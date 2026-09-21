@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galleria fotografica</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1>Galleria fotografica</h1>
+    <p>Clicca su una foto per ingrandirla.</p>
+  </header>
+
+  <main>
+    <ul class="gallery" id="gallery">
+      <li class="gallery__item">
+        <button type="button" class="gallery__button" data-full="https://picsum.photos/id/237/1200/900">
+          <img class="gallery__thumb" src="https://picsum.photos/id/237/400/300" alt="Cane nero sdraiato su un pavimento di legno" loading="lazy">
+        </button>
+      </li>
+      <li class="gallery__item">
+        <button type="button" class="gallery__button" data-full="https://picsum.photos/id/13/2500/1667">
+          <img class="gallery__thumb" src="https://picsum.photos/id/13/400/300" alt="Laptop e tazza di caffè su una scrivania di legno" loading="lazy">
+        </button>
+      </li>
+      <li class="gallery__item">
+        <button type="button" class="gallery__button" data-full="https://picsum.photos/id/17/2500/1667">
+          <img class="gallery__thumb" src="https://picsum.photos/id/17/400/300" alt="Paesaggio naturale con alberi" loading="lazy">
+        </button>
+      </li>
+      <li class="gallery__item">
+        <button type="button" class="gallery__button" data-full="https://picsum.photos/id/29/4000/2670">
+          <img class="gallery__thumb" src="https://picsum.photos/id/29/400/300" alt="Veduta panoramica in esterna" loading="lazy">
+        </button>
+      </li>
+      <li class="gallery__item">
+        <button type="button" class="gallery__button" data-full="https://picsum.photos/id/1015/1200/900">
+          <img class="gallery__thumb" src="https://picsum.photos/id/1015/400/300" alt="Paesaggio fluviale circondato da montagne" loading="lazy">
+        </button>
+      </li>
+    </ul>
+  </main>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Immagine ingrandita" hidden>
+    <div class="lightbox__overlay" id="lightboxOverlay"></div>
+    <div class="lightbox__content">
+      <button type="button" class="lightbox__close" id="lightboxClose" aria-label="Chiudi">&times;</button>
+      <button type="button" class="lightbox__nav lightbox__nav--prev" id="lightboxPrev" aria-label="Foto precedente">&#8249;</button>
+      <img class="lightbox__image" id="lightboxImage" src="" alt="">
+      <button type="button" class="lightbox__nav lightbox__nav--next" id="lightboxNext" aria-label="Foto successiva">&#8250;</button>
+    </div>
+  </div>
+
+  <script src="js/gallery.js"></script>
+</body>
+</html>
