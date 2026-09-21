@@ -34,6 +34,8 @@
       img.src = picsumUrl(photo.id, photo.thumbWidth, photo.thumbHeight);
       img.alt = photo.alt;
       img.loading = 'lazy';
+      img.width = photo.thumbWidth;
+      img.height = photo.thumbHeight;
 
       button.appendChild(img);
       li.appendChild(button);
