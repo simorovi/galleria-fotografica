@@ -7,9 +7,45 @@
   var nextButton = document.getElementById('lightboxNext');
   var overlay = document.getElementById('lightboxOverlay');
 
-  var buttons = Array.prototype.slice.call(gallery.querySelectorAll('.gallery__button'));
   var currentIndex = -1;
   var lastFocusedElement = null;
+  var touchStartX = null;
+  var touchStartY = null;
+  var SWIPE_THRESHOLD = 40;
+
+  function picsumUrl(id, width, height) {
+    return 'https://picsum.photos/id/' + id + '/' + width + '/' + height;
+  }
+
+  function renderGallery(photos) {
+    var fragment = document.createDocumentFragment();
+
+    photos.forEach(function (photo) {
+      var li = document.createElement('li');
+      li.className = 'gallery__item';
+
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'gallery__button';
+      button.setAttribute('data-full', picsumUrl(photo.id, photo.fullWidth, photo.fullHeight));
+
+      var img = document.createElement('img');
+      img.className = 'gallery__thumb';
+      img.src = picsumUrl(photo.id, photo.thumbWidth, photo.thumbHeight);
+      img.alt = photo.alt;
+      img.loading = 'lazy';
+
+      button.appendChild(img);
+      li.appendChild(button);
+      fragment.appendChild(li);
+    });
+
+    gallery.appendChild(fragment);
+  }
+
+  renderGallery(window.PHOTOS || []);
+
+  var buttons = Array.prototype.slice.call(gallery.querySelectorAll('.gallery__button'));
 
   function openLightbox(index) {
     currentIndex = index;
@@ -75,4 +111,32 @@
       showPrev();
     }
   });
+
+  lightbox.addEventListener('touchstart', function (event) {
+    var touch = event.changedTouches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+  }, { passive: true });
+
+  lightbox.addEventListener('touchend', function (event) {
+    if (touchStartX === null) {
+      return;
+    }
+
+    var touch = event.changedTouches[0];
+    var deltaX = touch.clientX - touchStartX;
+    var deltaY = touch.clientY - touchStartY;
+    touchStartX = null;
+    touchStartY = null;
+
+    if (Math.abs(deltaX) < SWIPE_THRESHOLD || Math.abs(deltaX) < Math.abs(deltaY)) {
+      return;
+    }
+
+    if (deltaX < 0) {
+      showNext();
+    } else {
+      showPrev();
+    }
+  }, { passive: true });
 })();
