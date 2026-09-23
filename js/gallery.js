@@ -2,10 +2,18 @@
   var gallery = document.getElementById('gallery');
   var lightbox = document.getElementById('lightbox');
   var lightboxImage = document.getElementById('lightboxImage');
+  var lightboxContent = lightbox.querySelector('.lightbox__content');
   var closeButton = document.getElementById('lightboxClose');
   var prevButton = document.getElementById('lightboxPrev');
   var nextButton = document.getElementById('lightboxNext');
   var overlay = document.getElementById('lightboxOverlay');
+
+  var lightboxError = document.createElement('p');
+  lightboxError.className = 'lightbox__error';
+  lightboxError.textContent = 'Immagine non disponibile';
+  lightboxError.hidden = true;
+  lightboxError.style.cssText = 'color:#fff;text-align:center;margin:0;padding:16px;';
+  lightboxContent.appendChild(lightboxError);
 
   var currentIndex = -1;
   var lastFocusedElement = null;
@@ -15,6 +23,24 @@
 
   function picsumUrl(id, width, height) {
     return 'https://picsum.photos/id/' + id + '/' + width + '/' + height;
+  }
+
+  function showImageError() {
+    lightboxError.hidden = false;
+  }
+
+  function hideImageError() {
+    lightboxError.hidden = true;
+  }
+
+  function handleImageLoad() {
+    lightboxImage.classList.add('is-loaded');
+    hideImageError();
+  }
+
+  function handleImageError() {
+    lightboxImage.classList.remove('is-loaded');
+    showImageError();
   }
 
   function renderGallery(photos) {
@@ -49,26 +75,88 @@
 
   var buttons = Array.prototype.slice.call(gallery.querySelectorAll('.gallery__button'));
 
+  function getFocusableLightboxElements() {
+    // Gruppo di elementi focusabili dentro il lightbox, nell'ordine in cui
+    // devono ricevere il focus con Tab/Shift+Tab.
+    return [closeButton, prevButton, nextButton].filter(function (el) {
+      return el && !el.hidden && !el.disabled;
+    });
+  }
+
+  function trapFocus(event) {
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    var focusable = getFocusableLightboxElements();
+    if (focusable.length === 0) {
+      return;
+    }
+
+    var first = focusable[0];
+    var last = focusable[focusable.length - 1];
+    var active = document.activeElement;
+
+    if (event.shiftKey) {
+      if (active === first || !lightboxContent.contains(active)) {
+        event.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (active === last || !lightboxContent.contains(active)) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+  }
+
   function openLightbox(index) {
     currentIndex = index;
     var button = buttons[currentIndex];
     var img = button.querySelector('img');
+    var targetSrc = button.getAttribute('data-full');
+
+    // Se il src richiesto è già quello attualmente assegnato all'immagine
+    // del lightbox, riassegnarlo non genera un nuovo evento 'load'/'error'
+    // (il browser non ripete una richiesta per un URL già risolto): lo
+    // stato di visibilità/errore va quindi aggiornato subito "a mano".
+    var isSameImageAlreadySet = lightboxImage.getAttribute('src') === targetSrc;
 
     lastFocusedElement = document.activeElement;
 
+    hideImageError();
     lightboxImage.classList.remove('is-loaded');
-    lightboxImage.src = button.getAttribute('data-full');
+    lightboxImage.src = targetSrc;
     lightboxImage.alt = img.getAttribute('alt');
 
     lightbox.hidden = false;
     document.body.style.overflow = 'hidden';
+
+    // Rende il resto della pagina (in particolare la griglia sottostante,
+    // coperta ma altrimenti ancora raggiungibile) inaccessibile a tastiera
+    // e screen reader finché il lightbox è aperto.
+    gallery.setAttribute('inert', '');
+
     closeButton.focus();
+
+    if (isSameImageAlreadySet && lightboxImage.complete) {
+      if (lightboxImage.naturalWidth > 0) {
+        handleImageLoad();
+      } else {
+        handleImageError();
+      }
+    }
   }
 
   function closeLightbox() {
     lightbox.hidden = true;
     document.body.style.overflow = '';
     lightboxImage.src = '';
+    hideImageError();
+
+    // L'attributo inert va rimosso PRIMA di spostare il focus sull'elemento
+    // salvato: un elemento reso inert non può ricevere focus.
+    gallery.removeAttribute('inert');
 
     if (lastFocusedElement) {
       lastFocusedElement.focus();
@@ -92,9 +180,8 @@
     openLightbox(index);
   });
 
-  lightboxImage.addEventListener('load', function () {
-    lightboxImage.classList.add('is-loaded');
-  });
+  lightboxImage.addEventListener('load', handleImageLoad);
+  lightboxImage.addEventListener('error', handleImageError);
 
   closeButton.addEventListener('click', closeLightbox);
   overlay.addEventListener('click', closeLightbox);
@@ -111,6 +198,8 @@
       showNext();
     } else if (event.key === 'ArrowLeft') {
       showPrev();
+    } else if (event.key === 'Tab') {
+      trapFocus(event);
     }
   });
 
