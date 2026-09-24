@@ -125,6 +125,8 @@ main {
 .lightbox__image {
   max-width: 92vw;
   max-height: 88vh;
+  min-width: 260px;
+  min-height: 180px;
   display: block;
   border-radius: 4px;
   opacity: 0;
@@ -133,6 +135,19 @@ main {
 
 .lightbox__image.is-loaded {
   opacity: 1;
+}
+
+.lightbox__error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 16px;
+  color: #fff;
+  text-align: center;
+  pointer-events: none;
 }
 
 .lightbox__close,
