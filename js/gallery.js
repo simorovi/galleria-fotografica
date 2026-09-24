@@ -12,7 +12,6 @@
   lightboxError.className = 'lightbox__error';
   lightboxError.textContent = 'Immagine non disponibile';
   lightboxError.hidden = true;
-  lightboxError.style.cssText = 'color:#fff;text-align:center;margin:0;padding:16px;';
   lightboxContent.appendChild(lightboxError);
 
   var currentIndex = -1;
